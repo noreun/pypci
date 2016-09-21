@@ -1,3 +1,12 @@
+# Implements the PCI algorithm from
+#
+# Casali, Adenauer G, Olivia Gosseries, Mario Rosanova, Mélanie Boly, Simone Sarasso, Karina R Casali, Silvia Casarotto, et al. “A Theoretically Based Index of Consciousness Independent of Sensory Processing and Behavior.” Science Translational Medicine 5, no. 198 (August 2013): 198ra105-198ra105. doi:10.1126/scitranslmed.3006294.
+#
+# Leonardo Barbosa
+# leonardo.barbosa@usp.br
+# 21/09/2016
+#
+
 import numpy as np
 
 def rolling_window(a, size):
