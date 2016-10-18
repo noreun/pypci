@@ -1,6 +1,7 @@
-# Implements the PCI algorithm from
+# coding=utf-8
+#  Implements the PCI algorithm from
 #
-# Casali, Adenauer G, Olivia Gosseries, Mario Rosanova, Mélanie Boly, Simone Sarasso, Karina R Casali, Silvia Casarotto, et al. “A Theoretically Based Index of Consciousness Independent of Sensory Processing and Behavior.” Science Translational Medicine 5, no. 198 (August 2013): 198ra105-198ra105. doi:10.1126/scitranslmed.3006294.
+#Casali, Adenauer G, Olivia Gosseries, Mario Rosanova, Mélanie Boly, Simone Sarasso, Karina R Casali, Silvia Casarotto, et al. “A Theoretically Based Index of Consciousness Independent of Sensory Processing and Behavior.” Science Translational Medicine 5, no. 198 (August 2013): 198ra105-198ra105. doi:10.1126/scitranslmed.3006294.
 #
 # Leonardo Barbosa
 # leonardo.barbosa@usp.br
@@ -15,6 +16,7 @@ def rolling_window(a, size):
     return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides)
 
 def pci(L):
+
     l1 = L.shape[0]-1
 
     if len(L.shape) > 1:
@@ -22,6 +24,7 @@ def pci(L):
             raise Exception('data has to be 1D or 2D')
         l2 = L.shape[1]-1
     else:
+        # TODO 1D version needs further testing!
         L = L.reshape([len(L), 1])
         l2 = 0
 
@@ -33,7 +36,7 @@ def pci(L):
 
     stop = False
 
-    n_iterations = 0
+    # n_iterations = 0
     while not stop:
 
         if q == r:
@@ -41,9 +44,8 @@ def pci(L):
         else:
             a=l1
 
-#        n_iterations += 1
-#        print "Iteration #%d: (c=%d, r=%d, q=%d ,k=%d ,i=%d ,a=%d)" % (n_iterations, c, r, q, k, i, a)
-
+        # n_iterations += 1
+        # print "Iteration #%d: (c=%d, r=%d, q=%d ,k=%d ,i=%d ,a=%d)" % (n_iterations, c, r, q, k, i, a)
 
         d = L[i:i+k,r]
         e = L[0:a,q]
@@ -64,7 +66,7 @@ def pci(L):
         else:
 
             q -= 1
-            if q > 0:
+            if q < 0:
 
                 c += 1
                 i = i + k
@@ -116,26 +118,19 @@ def lz_complexity(s):
     return c
 
 
-def main():
-    lz = lz_complexity('1001111011000010')
-    assert lz == 6
-    print lz
-
-
-
 #data = (1 * (np.random.rand(100,100) > .5)).astype('str')
-data = 1 * (np.random.rand(30,30) > .5)
-
-data_c = pci(data)
-print "Complexity of data : %d" % data_c
-
-# Compare to the 1D implementation
-
-data_1d = data.flatten()
-
-data_1d_c = pci(data_1d)
-print "Complexity of 1D data : %d" % data_1d_c
-
-data_1d_c2 = lz_complexity(data_1d)
-print "Complexity 2 of 1D data : %d" % data_1d_c2
+#data = 1 * (np.random.rand(100,100) > .5)
+#
+#data_c = pci(data)
+#print "Complexity of data : %d" % data_c
+#
+## Compare to the 1D implementation
+#
+#data_1d = data.flatten()
+#
+# data_1d_c = pci(data_1d)
+# print "Complexity of 1D data : %d" % data_1d_c
+#
+# data_1d_c2 = lz_complexity(data_1d)
+# print "Complexity 2 of 1D data : %d" % data_1d_c2
 
