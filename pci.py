@@ -10,23 +10,17 @@
 
 import numpy as np
 
-def rolling_window(a, size):
-    shape = a.shape[:-1] + (a.shape[-1] - size + 1, size)
-    strides = a.strides + (a. strides[-1],)
-    return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides)
-
+#TODO implement normalization!
 def pci(L):
+    return lz_complexity_2D(L)
+
+def lz_complexity_2D(L):
+
+    if len(L.shape) != 2:
+        raise Exception('data has to be 2D!')
 
     l1 = L.shape[0]-1
-
-    if len(L.shape) > 1:
-        if len(L.shape) > 2:
-            raise Exception('data has to be 1D or 2D')
-        l2 = L.shape[1]-1
-    else:
-        # TODO 1D version needs further testing!
-        L = L.reshape([len(L), 1])
-        l2 = 0
+    l2 = L.shape[1]-1
 
     c=1
     r=0
@@ -35,6 +29,23 @@ def pci(L):
     i=0
 
     stop = False
+
+    def end_of_line(r, c, i, q, k, stop):
+
+        # go to the next column
+        r += 1
+
+        # end line + end of column? end of the algorithm...
+        if r > l2:
+            c += 1
+            stop = True
+        else:
+            # reset for next line
+            i = 0
+            q = r - 1
+            k = 1
+
+        return r, c, i, q, k, stop
 
     # n_iterations = 0
     while not stop:
@@ -55,14 +66,9 @@ def pci(L):
 
             k += 1
             if i+k > l1:
-                r += 1
-                if r > l2:
-                    c += 1
-                    stop = True
-                else:
-                    i = 0
-                    q = r - 1
-                    k = 1
+
+                (r, c, i, q, k, stop) = end_of_line(r, c, i, q, k, stop)
+
         else:
 
             q -= 1
@@ -72,20 +78,18 @@ def pci(L):
                 i = i + k
                 if i + 1 > l1:
 
-                    r += 1
-                    if r > l2:
-                        c += 1
-                        stop = True
-                    else:
-                        i = 0
-                        q = r - 1
-                        k = 1
-                else:
+                    (r, c, i, q, k, stop) = end_of_line(r, c, i, q, k, stop)
 
+                else:
                     q = r
                     k = 1
 
     return c
+
+def rolling_window(a, size):
+    shape = a.shape[:-1] + (a.shape[-1] - size + 1, size)
+    strides = a.strides + (a. strides[-1],)
+    return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides)
 
 # 1D Lempel-Ziv implementation from: http://stackoverflow.com/questions/4946695/calculating-lempel-ziv-lz-complexity-aka-sequence-complexity-of-a-binary-str
 # Kaspar, F. Schuster, H. Easily calculable measure for the complexity of spatiotemporal patterns. Physical Review A, vol 36, n. 2, p 842.
