@@ -13,17 +13,24 @@ import numpy as np
 DEBUG = False
 #DEBUG = True
 
-#TODO implement normalization!
-def pci(L):
-    return lz_complexity_2D(L)
+def pci(D):
 
-def lz_complexity_2D(L):
+    L = D.shape[0] * D.shape[1]
+    p1 = sum(1.0 * (D.flatten() == 1)) / L
+    p0 = 1 - p1
+    H = -p1 * np.log2(p1) -p0 * np.log2(p0)
 
-    if len(L.shape) != 2:
+    S = (L * H) / np.log2(L)
+
+    return lz_complexity_2D(D) / S
+
+def lz_complexity_2D(D):
+
+    if len(D.shape) != 2:
         raise Exception('data has to be 2D!')
 
-    l1 = L.shape[0]
-    l2 = L.shape[1]
+    L1 = D.shape[0]
+    L2 = D.shape[1]
 
     c=1
     r=1
@@ -39,7 +46,7 @@ def lz_complexity_2D(L):
         r += 1
 
         # end line + end of column? end of the algorithm...
-        if r > l2:
+        if r > L2:
             c += 1
             stop = True
         else:
@@ -56,21 +63,21 @@ def lz_complexity_2D(L):
         if q == r:
             a = i+k-1
         else:
-            a=l1
+            a=L1
 
         if DEBUG:
             n_iterations += 1
             print "Iteration #%d: (c=%d, r=%d, q=%d ,k=%d ,i=%d ,a=%d)" % (n_iterations, c, r, q, k, i, a)
 
-        d = L[i:i+k+1,r-1]
-        e = L[0:a+1,q-1]
+        d = D[i:i+k,r-1]
+        e = D[0:a,q-1]
 
         found = np.all(rolling_window(e, len(d)) == d, axis=1)
 
         if found.any():
 
             k += 1
-            if i+k > l1:
+            if i+k > L1:
 
                 (r, c, i, q, k, stop) = end_of_line(r, c, i, q, k, stop)
 
@@ -81,7 +88,7 @@ def lz_complexity_2D(L):
 
                 c += 1
                 i = i + k
-                if i + 1 > l1:
+                if i + 1 > L1:
 
                     (r, c, i, q, k, stop) = end_of_line(r, c, i, q, k, stop)
 
