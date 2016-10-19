@@ -10,6 +10,9 @@
 
 import numpy as np
 
+DEBUG = False
+#DEBUG = True
+
 #TODO implement normalization!
 def pci(L):
     return lz_complexity_2D(L)
@@ -19,14 +22,14 @@ def lz_complexity_2D(L):
     if len(L.shape) != 2:
         raise Exception('data has to be 2D!')
 
-    l1 = L.shape[0]-1
-    l2 = L.shape[1]-1
+    l1 = L.shape[0]
+    l2 = L.shape[1]
 
     c=1
-    r=0
-    q=0
+    r=1
+    q=1
     k=1
-    i=0
+    i=1
 
     stop = False
 
@@ -47,7 +50,7 @@ def lz_complexity_2D(L):
 
         return r, c, i, q, k, stop
 
-    # n_iterations = 0
+    n_iterations = 0
     while not stop:
 
         if q == r:
@@ -55,11 +58,16 @@ def lz_complexity_2D(L):
         else:
             a=l1
 
-        # n_iterations += 1
-        # print "Iteration #%d: (c=%d, r=%d, q=%d ,k=%d ,i=%d ,a=%d)" % (n_iterations, c, r, q, k, i, a)
+        if DEBUG:
+            n_iterations += 1
+            print "Iteration #%d: (c=%d, r=%d, q=%d ,k=%d ,i=%d ,a=%d)" % (n_iterations, c, r, q, k, i, a)
 
-        d = L[i:i+k,r]
-        e = L[0:a,q]
+        try:
+            d = L[i:i+k+1,r-1]
+            e = L[0:a+1,q-1]
+        except:
+            print('Error')
+
         found = np.all(rolling_window(e, len(d)) == d, axis=1)
 
         if found.any():
@@ -72,7 +80,7 @@ def lz_complexity_2D(L):
         else:
 
             q -= 1
-            if q < 0:
+            if q < 1:
 
                 c += 1
                 i = i + k
