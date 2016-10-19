@@ -62,11 +62,8 @@ def lz_complexity_2D(L):
             n_iterations += 1
             print "Iteration #%d: (c=%d, r=%d, q=%d ,k=%d ,i=%d ,a=%d)" % (n_iterations, c, r, q, k, i, a)
 
-        try:
-            d = L[i:i+k+1,r-1]
-            e = L[0:a+1,q-1]
-        except:
-            print('Error')
+        d = L[i:i+k+1,r-1]
+        e = L[0:a+1,q-1]
 
         found = np.all(rolling_window(e, len(d)) == d, axis=1)
 
