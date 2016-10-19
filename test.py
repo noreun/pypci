@@ -2,7 +2,7 @@
 import pci
 import pickle
 import time
-# import numpy as np
+import numpy as np
 
 # BEWARE: this takes ~17 min in a Intel Xeon CPU E5-2630 v3 @ 2.40GHz
 
@@ -13,18 +13,17 @@ lz = pci.lz_complexity('1001111011000010')
 print '1D found: %d, should be %d' % (lz, 6)
 assert lz == 6
 
-# test 2D algorithm (beware: this might take a few minutes!)
+# test 2D algorithm
 with open('./lz_2D_example.pickle', 'r') as f:
     known_pci = pickle.load(f)
 
-#lz_columnwise = pci.lz_complexity_2D(known_pci['data'])
-#print '2D LZ columnwise found: %d, should be %d' % (lz_columnwise, known_pci['lz_columnwise'])
-#assert lz_columnwise == known_pci['lz_columnwise']
+lz_columnwise = pci.lz_complexity_2D(known_pci['data'])
+print '2D LZ columnwise found: %d, should be %d' % (lz_columnwise, known_pci['lz_columnwise'])
+assert lz_columnwise == known_pci['lz_columnwise']
 
-PCI_columnwise = pci.pci(known_pci['data'])
+PCI_columnwise = lz_columnwise / pci.pci_norm_factor(known_pci['data'])
 print 'PCI columnwise found: %f, should be %f' % (PCI_columnwise, known_pci['pci_columnwise'])
-#assert np.int(100000*PCI_columnwise) == np.int(100000*known_pci['pci_columnwise']))
-
+assert np.int(100000*PCI_columnwise) == np.int(100000*known_pci['pci_columnwise'])
 
 #lz_linewise = pci.lz_complexity_2D(known_pci['data'].T)
 #print '2D linewise found: %d, should be %d' % (lz_linewise, known_pci['lz_linewise'])
@@ -35,10 +34,4 @@ print 'PCI columnwise found: %f, should be %f' % (PCI_columnwise, known_pci['pci
 #print '2D linewise found: %d, should be %d' % (lz_2D, 5)
 
 print("End: " + time.strftime("%c"))
-
-#Start: Tue Oct 18 12:20:04 2016
-#1D found: 6, should be 6
-#2D columnwise found: 16841, should be 16842
-#2D linewise found: 7486, should be 7518
-#End: Tue Oct 18 12:37:07 2016
 

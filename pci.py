@@ -13,8 +13,11 @@ import numpy as np
 DEBUG = False
 #DEBUG = True
 
-def pci(D):
+def calculate(D):
 
+    return lz_complexity_2D(D) / pci_norm_factor(D)
+
+def pci_norm_factor(D):
     L = D.shape[0] * D.shape[1]
     p1 = sum(1.0 * (D.flatten() == 1)) / L
     p0 = 1 - p1
@@ -22,7 +25,7 @@ def pci(D):
 
     S = (L * H) / np.log2(L)
 
-    return lz_complexity_2D(D) / S
+    return S
 
 def lz_complexity_2D(D):
 
@@ -72,7 +75,7 @@ def lz_complexity_2D(D):
         d = D[i:i+k,r-1]
         e = D[0:a,q-1]
 
-        found = np.all(rolling_window(e, len(d)) == d, axis=1)
+        found = np.all(_rolling_window(e, len(d)) == d, axis=1)
 
         if found.any():
 
@@ -98,7 +101,7 @@ def lz_complexity_2D(D):
 
     return c
 
-def rolling_window(a, size):
+def _rolling_window(a, size):
     shape = a.shape[:-1] + (a.shape[-1] - size + 1, size)
     strides = a.strides + (a. strides[-1],)
     return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides)
@@ -112,16 +115,16 @@ def lz_complexity(s):
     c = 1
     while True:
         if s[i + k - 1] == s[l + k - 1]:
-            k = k + 1
+            k += 1
             if l + k >= n - 1:
-                c = c + 1
+                c += 1
                 break
         else:
             if k > k_max:
                k_max = k
-            i = i + 1
+            i += 1
             if i == l:
-                c = c + 1
+                c += 1
                 l = l + k_max
                 if l + 1 > n:
                     break
