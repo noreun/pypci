@@ -10,12 +10,37 @@
 # 19/10/2016 : Fixed bug due to indexing problem
 #              Implemented normalization
 # 20/10/2016 : Implemented search with bitarray (3x faster)
+# 15/2/2016:    added the "calculate_pci_lower" function to compute the lower bound of the time-dependent PCI (Thierry Nieus thierry.nieus@unimi.it, University of Milan, Dipartimento di Scienze Biomediche e Cliniche L.Sacco)
+
 
 import numpy as np
 from bitarray import bitarray
 
-def calculate(D):
+def calculate_pci_lower(D):
+    '''
+        Computes a lower bound of the PCI for the binary matrix D. 
+        
+        The PCI is computed on the ordered matrix D (i.e. the channels are ranked based on the evoked activity).  
+        A speed up in the calculation is achieved removing the zero-rows (see Casali's MATLAB code).
+    '''
+    global ct 
+    Irank=np.sum(D,axis=1).argsort()
+    S=D[Irank,:].sum(axis=1)
+    Izero=np.where(S==0)[0]
+    number0removed=D.shape[1]*len(Izero)
+    Dnew=D[Irank,:][Izero[-1]+1:,:]
+    a=lz_complexity_2D(Dnew)
 
+    nValues=float(D.shape[0]*D.shape[1])
+    p1=np.sum(D)/nValues
+    p0=1-p1
+
+    N=np.log2(nValues)/nValues
+    H=-p1*np.log2(p1)-p0*np.log2(p0)
+    PCI=N*np.array(ct)/H
+    return PCI
+
+def calculate(D):
     return lz_complexity_2D(D) / pci_norm_factor(D)
 
 def pci_norm_factor(D):
@@ -30,7 +55,7 @@ def pci_norm_factor(D):
     return S
 
 def lz_complexity_2D(D):
-
+    global ct   # time dependent complexity 
     if len(D.shape) != 2:
         raise Exception('data has to be 2D!')
 
@@ -56,6 +81,8 @@ def lz_complexity_2D(D):
             k = 1
         return r, c, i, q, k, stop
 
+    ct=[]
+
     # main loop
     while not stop:
 
@@ -79,6 +106,7 @@ def lz_complexity_2D(D):
             k += 1
             if i+k > L1:
                 (r, c, i, q, k, stop) = end_of_column(r, c, i, q, k, stop)
+                ct.append(c)     
         else:
             q -= 1
             if q < 1:
@@ -86,10 +114,8 @@ def lz_complexity_2D(D):
                 i = i + k
                 if i + 1 > L1:
                     (r, c, i, q, k, stop) = end_of_column(r, c, i, q, k, stop)
+                    ct.append(c)      
                 else:
                     q = r
                     k = 1
-
     return c
-
-
